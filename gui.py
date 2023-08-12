@@ -1,6 +1,9 @@
 import functions
 import PySimpleGUI as sg
+import time
 
+sg.theme("Black")
+clock = sg.Text('', key='clock')
 label = sg.Text("Type in to-do")
 input_box = sg.InputText(tooltip="Enter todo", key="todo")
 list_box = sg.Listbox(values=functions.get_todos(), key="todos", size=[45,10], enable_events=True)
@@ -9,13 +12,14 @@ edit_button = sg.Button("Edit")
 complete_button = sg.Button("Complete")
 exit_button = sg.Button("Exit")
 window = sg.Window("My to-do app",
-                   layout=[[label], [input_box, add_button], [list_box, edit_button, complete_button], [exit_button]],
+                   layout=[[clock],[label], [input_box, add_button], [list_box, edit_button, complete_button], [exit_button]],
                    font=("Helvetica", 20))
 
 while True:
-    event, values = window.read()
+    event, values = window.read(timeout=200)
     print(event)
     print(values)
+    window["clock"].update(value=time.strftime("%b %d, %Y %H:%M:%S"))
     match event:
         case "Add":
             todos = functions.get_todos()
@@ -24,19 +28,25 @@ while True:
             functions.write_todos(todos)
             window['todos'].update(values=todos)
         case "Edit":
-            todos = functions.get_todos()
-            new_todo = values["todo"]
-            index = todos.index(values['todos'][0])
-            todos[index] = new_todo
-            functions.write_todos(todos)
-            window['todos'].update(todos)
+            try:
+                todos = functions.get_todos()
+                new_todo = values["todo"]
+                index = todos.index(values['todos'][0])
+                todos[index] = new_todo
+                functions.write_todos(todos)
+                window['todos'].update(todos)
+            except IndexError:
+                sg.popup("Please select at least one item", font=("Helvetica", 20))
         case "Complete":
-            todos = functions.get_todos()
-            complete_todo = values["todo"]
-            todos.remove(complete_todo)
-            functions.write_todos(todos)
-            window['todos'].update(todos)
-            window['todo'].update(value="")
+            try:
+                todos = functions.get_todos()
+                complete_todo = values["todo"]
+                todos.remove(complete_todo)
+                functions.write_todos(todos)
+                window['todos'].update(todos)
+                window['todo'].update(value="")
+            except ValueError:
+                sg.popup("Please select at least one item", font=("Helvetica", 20))
         case "todos":
             todo_to_edit = values['todos'][0]
             window['todo'].update(value=todo_to_edit)
