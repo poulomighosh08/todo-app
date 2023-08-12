@@ -1,7 +1,2 @@
-Eat healthy
-no office today
-Study
-office work
-add a new item
-complete day 11
-complete merge sorted array problem
+complete day 18
+Face pack
